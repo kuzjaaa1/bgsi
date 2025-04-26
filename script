@@ -18,8 +18,121 @@ local Window = Fluent:CreateWindow({
 })
 
 local Tabs = {
+    Main = Window:AddTab({ Title = "Main", Icon = "" }),
     Rifts = Window:AddTab({ Title = "Rifts", Icon = "" })
 }
+
+local autoTweenNearest = false
+local autoTweenSpeed = 15
+local currentTween = nil
+local autoTweenFlying = false
+
+Tabs.Main:AddToggle("AutoTweenNearest", {
+    Title = "Auto Tween to Nearest",
+    Description = "Automatically tween to nearest model (noclip)",
+    Default = false,
+    Callback = function(State)
+        autoTweenNearest = State
+        local player = Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoid = character:FindFirstChildWhichIsA("Humanoid")
+
+        if State then
+            if humanoid then
+                humanoid.PlatformStand = true
+            end
+            autoTweenFlying = true
+        else
+            if humanoid then
+                humanoid.PlatformStand = false
+            end
+            autoTweenFlying = false
+            if currentTween then
+                currentTween:Cancel()
+                currentTween = nil
+            end
+            -- Przy wyłączeniu przywróć kolizję
+            for _, part in ipairs(character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = true
+                end
+            end
+        end
+    end
+})
+
+Tabs.Main:AddSlider("AutoTweenSpeed", {
+    Title = "Tween Speed",
+    Description = "Set speed of auto tween",
+    Default = 15,
+    Min = 5,
+    Max = 35,
+    Rounding = 1,
+    Callback = function(Value)
+        autoTweenSpeed = Value
+    end
+})
+
+RunService.RenderStepped:Connect(function()
+    if autoTweenNearest then
+        local player = Players.LocalPlayer
+        local character = player.Character
+        if not character then return end
+
+        local hrp = character:FindFirstChild("HumanoidRootPart")
+        if not hrp then return end
+
+        -- Noclip - wyłącz kolizje na każdej klatce
+        for _, part in ipairs(character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = false
+            end
+        end
+
+        local modelsFolder = workspace:WaitForChild("Rendered"):GetChildren()[14]
+        if not modelsFolder or not modelsFolder:IsA("Folder") then return end
+
+        local nearestModel
+        local shortestDistance = math.huge
+
+        for _, model in ipairs(modelsFolder:GetChildren()) do
+            if model:IsA("Model") then
+                local modelPos = model:GetPivot().Position
+                local distance = (hrp.Position - modelPos).Magnitude
+
+                if distance < shortestDistance then
+                    shortestDistance = distance
+                    nearestModel = model
+                end
+            end
+        end
+
+        if nearestModel then
+            local targetPos = nearestModel:GetPivot().Position + Vector3.new(0, 5, 0)
+            local distance = (hrp.Position - targetPos).Magnitude
+            local duration = distance / autoTweenSpeed
+
+            if currentTween then
+                currentTween:Cancel()
+            end
+
+            local tweenInfo = TweenInfo.new(
+                duration,
+                Enum.EasingStyle.Quad,
+                Enum.EasingDirection.Out
+            )
+            local goal = {CFrame = CFrame.new(targetPos)}
+            currentTween = TweenService:Create(hrp, tweenInfo, goal)
+            currentTween:Play()
+        end
+
+        if autoTweenFlying then
+            hrp.Velocity = Vector3.new(0, 0, 0)
+        end
+    end
+end)
+
+
 
 local riftFolder = workspace:WaitForChild("Rendered"):WaitForChild("Rifts")
 
