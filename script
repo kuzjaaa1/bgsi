@@ -85,7 +85,7 @@ local bodyVelocity = nil
 
 Tabs.Rifts:AddToggle("FlyToRift", {
     Title = "Fly to Rift",
-    Description = "Fly towards selected Rift",
+    Description = "Fly to selected Rift",
     Default = false,
     Callback = function(State)
         local player = Players.LocalPlayer
@@ -138,7 +138,7 @@ local autoR = false
 
 Tabs.Rifts:AddToggle("AutoE", {
     Title = "Auto E",
-    Description = "Auto-press E",
+    Description = "Auto press E",
     Default = false,
     Callback = function(State)
         autoE = State
@@ -147,7 +147,7 @@ Tabs.Rifts:AddToggle("AutoE", {
 
 Tabs.Rifts:AddToggle("AutoR", {
     Title = "Auto R",
-    Description = "Auto-press R",
+    Description = "Auto press R",
     Default = false,
     Callback = function(State)
         autoR = State
