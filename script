@@ -158,9 +158,11 @@ RunService.RenderStepped:Connect(function()
     if autoE then
         VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game)
         VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game)
+        wait(0.01)
     end
     if autoR then
         VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.R, false, game)
         VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.R, false, game)
+        wait(0.01)
     end
 end)
